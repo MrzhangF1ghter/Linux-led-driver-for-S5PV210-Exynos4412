@@ -9,36 +9,41 @@ struct led_ops{
 	int leds;
 	int operation;
 };
-struct led_ops led_ops1;
+struct led_ops led_ops1,led_ops2;
 
-int main(int argc, char ** argv)
+int main(int argc, char * argv[])
 {
-	int val;
+	int val,leds,ops;
 	int fd = open("/dev/led_f1ghter",O_RDWR);
 	if(fd<0)
 	{
 		perror("open error!");
 		exit(-1);
 	}
-	printf("usage:./leds <led_no> <1/0>");
-	if(argv[1]<'1'||argv[1]>'4')
+	if(argc<3)
+	{
+		printf("command wrong! usage:./leds <led_no> <1/0>\n");
+		exit(-1);
+	}
+	leds = atoi(argv[1]);
+	ops =atoi(argv[2]);
+	if(leds<1||leds>4)
 	{
 		printf("led val should between 1~4.\n");
-		return -1;	
-	}
-	if(argv[2]!='0'||argv[2]!='1')
+		exit(-1);
+	}else if(ops!=0&&ops!=1)
 	{
 		printf("led on input 1,to turn off,input 0.\n");
-		return -1;	
+		exit(-1);
 	}
-		
-	led_ops1.leds=argv[1]-' ';
-	led_ops1.operation=argv[2]-' ';
-
+	//把命令行参数赋值给操作结构体
+	led_ops1.leds = leds;
+	led_ops1.operation = ops;
 	ioctl(fd,LED_OPERATION,&led_ops1);
 	printf("app:led%d on!\n",led_ops1.leds);
+
 	sleep(5);
-	printf("app:leds flow!\n",led_ops1.leds);
+	printf("Flow leds demo\n");
 	while(1)
 	{
 		for(val=1;val<=4;val++)
@@ -46,7 +51,6 @@ int main(int argc, char ** argv)
 			led_ops1.leds=val;
 			led_ops1.operation=LED_ON;
 			ioctl(fd,LED_OPERATION,&led_ops1);
-			printf("app:led%d on!\n",led_ops1.leds);
 			sleep(1);
 		}
 	}

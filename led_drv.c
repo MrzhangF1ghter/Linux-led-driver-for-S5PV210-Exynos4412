@@ -49,13 +49,14 @@ static int led_drv_open(struct inode *inode, struct file *file)
 	*con_reg=(*con_reg&(~0xffff))|(0x1111);
 	*dat_reg&=(~0xff);
 	printk("led device opened!support ioctl writen by MrzhangF1ghter\n");
-	printk("usage:./leds <led_no> <1/0>");
+	printk("usage:./leds <led_no> <1/0>\n");
 	return 0;
 }
 
 static int led_drv_close(struct inode *inode, struct file *file)
 {
-	
+	*con_reg=*con_reg&(~0xffff);
+	*dat_reg&=(~0xff);
 	printk("led device closed!\n");
 	return 0;
 }
@@ -65,11 +66,16 @@ static int led_drv_read(struct file *filp, char __user *buff,size_t count, loff_
 	printk("led device read!\n");
 	return 0;
 }
+static int led_drv_write(struct file *filp, char __user *buff,size_t count, loff_t *offp)
+{
+	printk("led device write!\n");
+	return 0;
+}
 
 
 static long led_drv_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
-	if(_IOC_TYPE(cmd) != LED_IORESET || _IOC_TYPE(cmd) != LED_OPERATION) 
+	if(_IOC_TYPE(cmd) != LED_TYPE) 
 		return - EINVAL;
 	if(_IOC_NR(cmd) > LED_MAXNUM) 
 		return - EINVAL;
@@ -82,7 +88,7 @@ static long led_drv_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 		case LED_OPERATION:
 			if(copy_from_user(&led_operation,(struct led_ops*)arg,sizeof(led_operation)))
 			{
-				printk("wrong val!use struct led_ops to operate");
+				printk("wrong val!use struct led_ops to operate\n");
 				return -1;
 			}
 			switch(led_operation.leds)
@@ -170,6 +176,7 @@ static struct file_operations led_fops = {
 	.open		= led_drv_open,
 	.release	= led_drv_close, 
 	.read		= led_drv_read,
+	.write		= led_drv_write,
 	.unlocked_ioctl	= led_drv_ioctl,
 	
 };
