@@ -35,8 +35,8 @@
 #define DAT_REG 0x110002E4
 #endif
 
-unsigned long *gpj2con = NULL;
-unsigned long *gpj2dat = NULL;
+unsigned long *con_reg = NULL;
+unsigned long *dat_reg = NULL;
 
 struct led_ops{
 	int leds;
@@ -46,8 +46,8 @@ struct led_ops led_operation;
 
 static int led_drv_open(struct inode *inode, struct file *file)
 {
-	*gpj2con=(*gpj2con&(~0xffff))|(0x1111);
-	*gpj2dat&=(~0xff);
+	*con_reg=(*con_reg&(~0xffff))|(0x1111);
+	*dat_reg&=(~0xff);
 	printk("led device opened!support ioctl writen by MrzhangF1ghter\n");
 	printk("usage:./leds <led_no> <1/0>");
 	return 0;
@@ -76,7 +76,7 @@ static long led_drv_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 	switch(cmd)
 	{
 		case LED_IORESET:
-			*gpj2dat=(*gpj2dat&(~0xff))|(0xff);//1111 1111
+			*dat_reg=(*dat_reg&(~0xff))|(0xff);//1111 1111
 			printk("LED_IORESET!\n");
 			break;
 		case LED_OPERATION:
@@ -91,11 +91,11 @@ static long led_drv_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 					switch(led_operation.operation)
 					{
 						case LED_ON:
-							*gpj2dat=(*gpj2dat&(~0xff))|(0xfe);//1111 1110
+							*dat_reg=(*dat_reg&(~0xff))|(0xfe);//1111 1110
 							printk("led1 on!\n");
 							break;
 						case LED_OFF:
-							*gpj2dat=(*gpj2dat|(0x01));//0000 0001
+							*dat_reg=(*dat_reg|(0x01));//0000 0001
 							printk("led1 off!\n");
 							break;
 					}
@@ -105,11 +105,11 @@ static long led_drv_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 					switch(led_operation.operation)
 					{
 						case LED_ON:
-							*gpj2dat=(*gpj2dat&(~0xff))|(0xfd);//1111 1101
+							*dat_reg=(*dat_reg&(~0xff))|(0xfd);//1111 1101
 							printk("led2 on!\n");
 							break;
 						case LED_OFF:
-							*gpj2dat=(*gpj2dat|(0x02));//0000 0001
+							*dat_reg=(*dat_reg|(0x02));//0000 0001
 							printk("led2 off!\n");
 							break;
 					}
@@ -119,11 +119,11 @@ static long led_drv_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 					switch(led_operation.operation)
 					{
 						case LED_ON:
-							*gpj2dat=(*gpj2dat&(~0xff))|(0xfb);//1111 1011
+							*dat_reg=(*dat_reg&(~0xff))|(0xfb);//1111 1011
 							printk("led3 on!\n");
 							break;
 						case LED_OFF:
-							*gpj2dat=(*gpj2dat|(0x04));//0000 0001
+							*dat_reg=(*dat_reg|(0x04));//0000 0001
 							printk("led3 off!\n");
 							break;
 					}
@@ -133,11 +133,11 @@ static long led_drv_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 					switch(led_operation.operation)
 					{
 						case LED_ON:
-							*gpj2dat=(*gpj2dat&(~0xff))|(0xf7);//1111 0111
+							*dat_reg=(*dat_reg&(~0xff))|(0xf7);//1111 0111
 							printk("led4 on!\n");
 							break;
 						case LED_OFF:
-							*gpj2dat=(*gpj2dat|(0x08));//0000 0001
+							*dat_reg=(*dat_reg|(0x08));//0000 0001
 							printk("led4 off!\n");
 							break;
 					}
@@ -147,11 +147,11 @@ static long led_drv_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 					switch(led_operation.operation)
 					{
 						case LED_ON:
-							*gpj2dat=(*gpj2dat&(~0xff))|(0xf0);//1111 1110
+							*dat_reg=(*dat_reg&(~0xff))|(0xf0);//1111 1110
 							printk("all led on!\n");
 							break;
 						case LED_OFF:
-							*gpj2dat=(*gpj2dat|(0xff));//0000 0001
+							*dat_reg=(*dat_reg|(0xff));//0000 0001
 							printk("all led off!\n");
 							break;
 					}
@@ -176,32 +176,33 @@ static struct file_operations led_fops = {
 
 static struct miscdevice led_dev = {
 	.minor = MISC_DYNAMIC_MINOR,
-	.name = "led",
+	.name = "led_f1ghter",
 	.fops = &led_fops,
 };
 
 static int __init led_drv_init(void)
 {
 	//”≥…‰µÿ÷∑
-	gpj2con=ioremap(CON_REG,4);
-	gpj2dat=ioremap(DAT_REG,4);
+	con_reg=ioremap(CON_REG,4);
+	dat_reg=ioremap(DAT_REG,4);
 	
 	misc_register(&led_dev);
 	
-	printk("leds module initialized!\n");
+	printk("leds module initialized!support ioctl\n");
 	return 0;
 }
 
 static void __exit led_drv_exit(void)
 {
-	*gpj2con=*gpj2con&(~0xffff);
-	*gpj2dat&=(~0xff);
+	*con_reg=*con_reg&(~0xffff);
+	*dat_reg&=(~0xff);
 
 	misc_register(&led_dev);
-	printk("led uninstalled! ioctl version.\n");
+	printk("led uninstalled!support ioctl\n");
 }
 
 module_init(led_drv_init);
 module_exit(led_drv_exit);
 MODULE_LICENSE("GPL");
+MODULE_AUTHOR("MrzhangF1ghter");
 

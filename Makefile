@@ -6,3 +6,5 @@ clean:
 	-rm -f *.ko
 	-rm -f *.symvers
 	-rm -f *.order
+	-rm -f *.order
+	-rm -f *.mod.c
