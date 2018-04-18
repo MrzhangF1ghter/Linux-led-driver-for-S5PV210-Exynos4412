@@ -21,19 +21,19 @@ int main(int argc, char ** argv)
 		exit(-1);
 	}
 	printf("usage:./leds <led_no> <1/0>");
-	if(argv[1]<1||argv[1]>4)
+	if(argv[1]<'1'||argv[1]>'4')
 	{
-		printf("led val should between 1~4.led值应为1到4之间");
+		printf("led val should between 1~4.\n");
 		return -1;	
 	}
-	if(argv[2]!=0||argv[2]!=1)
+	if(argv[2]!='0'||argv[2]!='1')
 	{
-		printf("led on input 1,to turn off,input 0.打开led输入1,关闭输入0");
+		printf("led on input 1,to turn off,input 0.\n");
 		return -1;	
 	}
 		
-	led_ops1.leds=argv[1];
-	led_ops1.operation=argv[2];
+	led_ops1.leds=argv[1]-' ';
+	led_ops1.operation=argv[2]-' ';
 
 	ioctl(fd,LED_OPERATION,&led_ops1);
 	printf("app:led%d on!\n",led_ops1.leds);
